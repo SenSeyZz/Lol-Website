@@ -3,17 +3,45 @@ import { useEffect, useState } from 'react';
 
 function App(){
 
-    function getName(){
+  var wOrl
 
+  let p = new Promise((resolve, reject) => {
+
+    var str,
+    element = document.getElementById('SummName');
+    if (element != null) {
+      str = element.value;
+      resolve("Resolved")
+    }
+    else {
+      str = null;
+    reject("Rejected")
+    }
+    
+  })
+
+
+  p.then(()=>{
+    getPuuid()
+  }).then(()=>{
+    getMatchId()
+  }).then(()=>{
+    getMatchstats()
+  }).then(()=>{
+    jsp()
+  })
+
+
+    function getName (){
       
-      setSummonerName(document.getElementById("SummName").value)
-
+      setSummonerName( document.getElementById("SummName").value)
+      
     }
 
-    function getPuuid(){
-      fetch(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${summonerName}?api_key=RGAPI-1c881f2a-4d40-4e76-bd34-cd60c0d46ad5`)
-          .then((response) => response.json())
-          .then((data) => setSummonerPuuid(data.puuid));
+       function getPuuid(){
+         fetch(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${summonerName}?api_key=RGAPI-1c881f2a-4d40-4e76-bd34-cd60c0d46ad5`)
+            .then((response) => response.json())
+            .then((data) => setSummonerPuuid(data.puuid));
     }
 
     function getMatchId(){
@@ -25,46 +53,36 @@ function App(){
     function getMatchstats(){
       fetch(`https://europe.api.riotgames.com/lol/match/v5/matches/${MatchId}?api_key=RGAPI-1c881f2a-4d40-4e76-bd34-cd60c0d46ad5`)
           .then((response) => response.json())
-          .then((data) => {console.log(data.info.participants)
-            
-            var puuid = SummonerPuuid
-            var participants = data.info.participants
-            for (let i = 0; i < participants.length; i++) {
-              if (participants[i].puuid == puuid) {
-                var win= {
-                  "name": participants[i].championName,
-                  'win': participants[i].win,
-
-                };
-              }
-              
-              
-            }
-            setMatchStatsChamp(win.name)
-            setMatchStatsWin(win.win)
-
-    
-
-          });
+          .then((data) => {setMatchStats(data.info.participants)});
 
           
   }
 
-  function winOrLoose() {
-    if(matchStatsWin === true){
-      setMatchStatsWin("Gagné")
-      
-    }
-    else{
-      setMatchStatsWin("Perdu")
-    }
+  function jsp(){
 
+    var puuid = SummonerPuuid
+    var participants = matchStats
+    for (let i = 0; i < participants.length; i++) {
+      if (participants[i].puuid == puuid) {
+        var win= {
+          name: participants[i].championName,
+          win: participants[i].win,
+        };
+        setMatchStatsChamp(win.name)
+        setMatchStatsWin(win.win)
+      }
+    
+    }
+    
   }
+
+ 
 
 
   const [summonerName, setSummonerName] = useState([])
   const [SummonerPuuid, setSummonerPuuid] = useState([])
   const [MatchId, setMatchId] = useState([])
+  const [matchStats, setMatchStats] = useState([])
   const [matchStatsChamp, setMatchStatsChamp] = useState([])
   const [matchStatsWin, setMatchStatsWin] = useState([])
 
@@ -73,23 +91,12 @@ function App(){
 
   return( 
     <div>
-      
-      <h1>{summPuuid}</h1>
-      <textarea id="SummName"></textarea>
+      <textarea id="SummName">SenSayz</textarea>
       <button onClick={getName} type ="button">Submit</button>
 
-      {summonerName.length > 0 && <div> 
-      <button onClick={getPuuid} type ="button">Puuid</button>
-      <button onClick={getMatchId} type ="button">Match</button>
-      <button onClick={getMatchstats} type ="button">MatchStats</button>
-      <button onClick={winOrLoose} type ="button">MatchStatsWin</button>
-      </div> }
-
-
       <h2>{summonerName}</h2>
-      <h2>{MatchId}</h2>
       <h2>{matchStatsChamp}</h2>
-      <h2>{matchStatsWin}</h2>
+      
       
       
 
